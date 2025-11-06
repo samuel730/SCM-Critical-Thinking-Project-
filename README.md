@@ -1,112 +1,152 @@
 # Source-Code-Management-Project-3
 
-Task 1: Evaluate Different SCM Tools
+Task 1 – Evaluate SCM Tools
+Deliverable: Report skeleton (markdown)
 
-Report: Why Git is the Best Choice for Our Team
+1.1 Centralized vs. Distributed
+| Feature                | Centralized (SVN)                     | Distributed (Git)                     |
+|------------------------|----------------------------------------|----------------------------------------|
+| Repository model   | Single server, clients pull/checkout   | Every clone is a full repo              |
+| Network dependency| Must talk to server for most actions   | Offline work; only push/pull needs net   |
+| Branching cost     | Heavy, creates server-side folders      | Light, instant branch/merge             |
+| Merge strategy     | File-level lock or manual merge         | Automatic 3-way merge; conflict-aware   |
+| Speed              | Slower for large histories             | Fast (local history, cheap diffs)       |
+| Access control     | Central ACLs, easier enforcement       | Distributed; can enforce via hooks/PRs   |
 
-After researching and evaluating different SCM tools, I strongly recommend transitioning to Git, a distributed version control system (DVCS). Here's why:
+1.2 Why Git for Distributed Teams
+- Local dev & offline work – devs can commit, branch, experiment anywhere.
+- Fast collaboration – Push/pull to remote, no single point of failure.
+- Rich ecosystem – GitHub, GitLab, Bitbucket, CI/CD integrations.
+- Built-in code review – Pull/Merge Requests + status checks.
 
-- Flexibility and Scalability: Git allows developers to work offline, and its distributed nature ensures that every developer has a full copy of the repository, making it easier to manage large codebases.
-- Collaboration: Git's branching model enables multiple developers to work on different features simultaneously without conflicts, making it ideal for distributed teams.
-- Security: Git's use of SHA-1 hashes ensures data integrity, and its support for signed commits and tags provides an additional layer of security.
-- Community Support: Git is widely used in the industry, and its large community ensures that there are plenty of resources available for learning and troubleshooting.
+1.3 Challenges & Mitigation
+- Learning curve – Provide training, internal cheat sheets.
+- Repo size – Use shallow clones, LFS for binaries.
+- Security – Enforce SSH keys, GPG signing, branch protection.
 
-While other DVCS tools like Mercurial are available, Git's widespread adoption and extensive feature set make it the best choice for our team.
+Task 2 – Git Workflow Guide
+2.1 Branching Model (Git Flow + PR)
 
-Task 2: Implement Git Workflows for a Team Project
+main → production
+develop → integration
+feature/* → new features
+hotfix/* → urgent fixes
+release/* → pre-prod staging
 
-Git Workflow Guide
 
-Our Git workflow will follow the Git Flow model, which includes the following branches:
+2.2 Typical Flow
+1. Create feature
 
-- main: The main branch will contain the production-ready code.
-- develop: The develop branch will serve as the main branch for development, where feature branches will be merged.
-- feature: Feature branches will be used for developing new features.
+bash
+git checkout develop
+git pull
+git checkout -b feature/login-api
 
-Branching Strategy
+2. Work, commit, push
 
-1. Create a new feature branch from the develop branch for each new feature.
-2. Use a descriptive name for the feature branch (e.g., feature/login-system).
-3. Merge the feature branch into the develop branch once it's complete.
+bash
+git add .
+git commit -m "feat: add login endpoint"
+git push -u origin feature/login-api
 
-Pull Requests
+3. Open PR → Assign reviewer, add PR template.
+4. CI checks (see Task 3) → Must pass lint, test, build.
+5. Merge → Squash & merge into develop, delete branch.
 
-1. Create a pull request for each feature branch to ensure code review.
-2. Assign a reviewer to each pull request.
-3. Ensure that the pull request is approved before merging it into the develop branch.
+2.3 Best Practices
+- Small, focused PRs (<200 LOC).
+- Rebase before PR to keep history clean.
+- Delete merged branches to avoid clutter.
 
-Best Practices
-
-- Use meaningful commit messages.
-- Keep commits small and focused on one change.
-- Use git rebase to squash commits before merging.
-
-Task 3: Automate Code Quality and Deployment
-
-.github/workflows/ci-cd.yml
-
+Task 3 – CI/CD Pipeline (GitHub Actions)
 
 name: CI/CD Pipeline
-
 on:
   push:
-    branches:
-      - develop
+    branches: [ feature/*, hotfix/* ]
+  pull_request:
+    branches: [ develop, main ]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Install deps
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test -- --coverage
+      - name: Build
+        run: npm run build
+      - name: Deploy to Staging
+        if: github.ref == 'refs/heads/develop'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
 
-      - name: Run unit tests
-        run: |
-          npm install
-          npm test
 
-      - name: Check code quality
-        run: |
-          npm run lint
+How it works:
+- Trigger on every push to feature branches & PRs to develop/main.
+- Lint → Test → Build → Deploy to staging if on develop.
+- Add status badge to README.md for visibility.
 
-      - name: Deploy to staging
-        uses: deploy-to-staging@v1
-        env:
-          STAGING_API_KEY: ${{ secrets.STAGING_API_KEY }}
+ Task 4 – Security Best Practices
+4.1 Enable Branch Protection
+- Require PR before merging to main/develop.
+- Require status checks Settings (CI must pass).
+- Sign commits with GPG.
+
+4.2 SSH & MFA
+- Rotate SSH keys every 90 days.
+- Enforce MFA for all devs.
+
+4.3 Audit
+- Enable GitHub Audit Log → export to SIEM.
+
+4.4 Sample Command
+
+bash
+# Generate GPG key
+gpg --full-generate-key
+git config --global user.signingkey <KEY_ID>
+git config --global commit. gpgsign true
+
+Task 5 – Resolve Merge Conflict
+5.1 Demo Script
+
+bash
+# Simulate conflict
+git checkout develop
+echo "console.log('hello')" > app.js
+git commit -am "Add log"
+git checkout -b feature/bug
+echo "console.log('world')" >> app.js
+git commit -am "Add world"
+git checkout develop
+echo "console.log('hi')" >> app.js
+git commit -am "Add hi"
+git merge feature/bug  # CONFLICT!
+
+# Resolve
+git status          Shows conflict in app.js
+# Manually edit app.js → keep desired lines
+git add app.js
+git commit          # Merge commit
+
+# Prevent future
+- **Rebase before PR**: `git pull --rebase origin develop`
+- **Short-lived branches**: merge within 24h.
+- **Protected branches**: enforce CI + PR.
 
 
-This pipeline will run unit tests, check code quality, and deploy changes to a staging environment when code is pushed to the develop branch.
-
-Task 4: Enforce Security Best Practices
-
-Security Best Practices
-
-1. User Access Controls: Use GitHub teams to manage access to the repository.
-2. SSH Keys: Use SSH keys to authenticate with the repository.
-3. Branch Protection: Enable branch protection for the main branch to prevent unauthorized changes.
-4. Signed Commits: Use signed commits for critical code changes.
-
-Configuring Security Best Practices
-
-1. Create a GitHub team and add members to it.
-2. Generate SSH keys and add them to the repository.
-3. Enable branch protection for the main branch.
-4. Configure signed commits using GPG keys.
-
-Task 5: Handle a Real-World Git Challenge
-
-Resolving Merge Conflicts
-
-1. Pull the latest code: git pull origin main
-2. Identify conflicting files: git status
-3. Merge changes: git merge feature/login-system
-4. Resolve conflicts manually.
-5. Commit the resolved changes: git commit -m "Resolved merge conflict"
-
-Preventing Future Conflicts
-
-1. Communicate with team members about changes.
-2. Use smaller, more frequent pull requests.
-3. Use git rebase to squash commits before merging.
-
-By following these best practices and workflows, we can ensure a smooth transition to Git and improve our overall development process.
+5.2 Prevention Checklist
+- Rebase workflow for feature branches.
+- Small PRs (max 300 lines).
+- Daily standup to flag overlapping files.

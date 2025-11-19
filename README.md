@@ -1,8 +1,6 @@
 # Source-Code-Management-Project-3
 
-Below is a **clean, professional, fully organized documentation** version of the entire Critical Thinking Project. You can submit this as your final report or present it to your team. If you want it exported as **PDF, DOCX, or Markdown**, just tell me.
 
----
 
 # **Source Code Management for a Distributed Development Team**
 

@@ -1,0 +1,258 @@
+Task 5: Handling a Real-World Git Merge Conflict
+
+Critical Thinking Project – Source Code Management for a Distributed Development Team
+
+
+---
+
+1. Introduction
+
+In a distributed development environment, merge conflicts are one of the most common challenges, especially when multiple developers work on related files or features simultaneously. In this scenario, two developers working on separate branches accidentally caused conflicting changes to be merged into the main branch after a failed merge operation. This task demonstrates how to resolve the conflict, restore code integrity, and implement workflow improvements to reduce such occurrences in the future.
+
+
+---
+
+2. Reproducing the Problem
+
+The issue occurred because:
+
+Two developers modified the same section of code
+
+Both attempted to merge their branches into main
+
+A failed merge was pushed before resolving conflicts
+
+The main branch now contains conflict markers and broken code
+
+
+This requires a manual conflict resolution and an update to team workflow practices.
+
+
+---
+
+3. Steps to Resolve the Merge Conflict
+
+Step 1: Switch to the Main Branch
+
+git checkout main
+
+Step 2: Pull the Latest Changes
+
+This brings the latest (conflicted) version of main into your local environment:
+
+git pull
+
+If conflicts appear during this pull, Git will alert you with messages like:
+
+CONFLICT (content): Merge conflict in src/app.js
+Automatic merge failed; fix conflicts and commit the result.
+
+
+---
+
+Step 3: Identify the Conflicting Files
+
+Run:
+
+git status
+
+This shows all files with conflicts, such as:
+
+both modified:   src/app.js
+both modified:   src/config/settings.json
+
+
+---
+
+Step 4: Open the Conflicted Files
+
+Conflicts appear in the file like this:
+
+<<<<<<< HEAD
+code from main branch
+=======
+code from feature branch
+>>>>>>> feature/login-update
+
+Explanation of sections:
+
+HEAD refers to the code currently in the main branch.
+
+The section below the divider (=======) is from the feature branch being merged.
+
+You must manually choose one, the other, or combine both.
+
+
+
+---
+
+Step 5: Resolve the Conflict
+
+To resolve, remove the conflict markers and edit the file to the correct combined version.
+For example:
+
+// Final resolved version
+function loginUser() {
+    validateInput();
+    authenticateUser();  
+    logAccessTime();  // Keep new addition from feature branch
+}
+
+
+---
+
+Step 6: Stage and Commit the Resolved Files
+
+git add src/app.js
+git add src/config/settings.json
+
+git commit -m "Resolved merge conflict between main and feature updates"
+
+
+---
+
+Step 7: Push the Fixed Code Back to the Server
+
+git push
+
+If branch protection rules require a pull request, open a PR and request review.
+
+
+---
+
+4. Restoring Code Integrity
+
+After resolving conflicts:
+
+Run unit tests
+
+Build the application
+
+Deploy to staging
+
+
+This ensures that the conflict resolution did not introduce new issues.
+
+
+---
+
+5. Preventing Future Merge Conflicts
+
+Conflicts cannot be eliminated completely, but the following workflow improvements will reduce their frequency and impact.
+
+
+---
+
+5.1 Encourage Smaller, More Frequent Pull Requests
+
+Smaller PRs:
+
+Reduce the chance of overlapping changes
+
+Make code easier to review
+
+Detect issues earlier
+
+
+
+---
+
+5.2 Require Developers to Pull Frequently
+
+Developers should frequently run:
+
+git fetch origin
+git pull origin main
+
+This keeps their local branches updated, preventing divergence.
+
+
+---
+
+5.3 Enforce Pull Request Reviews
+
+Add a rule:
+
+✔ At least one developer must review PRs before merging.
+
+This prevents incomplete merges and conflicting code from being pushed prematurely.
+
+
+---
+
+5.4 Improve Branching Strategy
+
+Clear branch naming convention:
+
+feature/*
+
+bugfix/*
+
+hotfix/*
+
+
+and ensuring all features branch off the latest main helps avoid outdated code.
+
+
+---
+
+5.5 Introduce Automated CI Checks
+
+Before merging, automatically verify:
+
+✔ Code compiles
+✔ Tests pass
+✔ Linter shows no errors
+
+This prevents broken or partially merged code from entering main.
+
+
+---
+
+5.6 Improve Team Communication
+
+Developers must coordinate when working on large or overlapping features:
+
+Use Slack/Teams for quick updates
+
+Notify the team before starting major refactoring
+
+Maintain a shared Kanban board showing who is editing what
+
+
+
+---
+
+5.7 Require Rebase Before Merging
+
+Feature branches should be rebased with main before merge:
+
+git checkout feature/login-update
+git pull --rebase origin main
+
+This minimizes the chances of conflicts during merging.
+
+
+---
+
+6. Summary
+
+This task demonstrated how to resolve a real-world merge conflict by:
+
+Pulling the latest code
+
+Identifying conflicting files
+
+Manually resolving the conflict in each file
+
+Committing and pushing the fixed version
+
+
+Additionally, several workflow improvements were recommended to prevent future conflicts, including:
+
+✔ Frequent updates from main
+✔ Smaller pull requests
+✔ Required code reviews
+✔ Automated CI checks
+✔ Clear branching strategy
+✔ Stronger team communication

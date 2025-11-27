@@ -1,0 +1,237 @@
+
+Git Workflow Guide for a Distributed Development Team
+
+Critical Thinking Project – Task 2
+Source Code Management for a Distributed Development Team
+
+
+---
+
+1. Introduction
+
+As the company transitions from a centralized VCS (SVN) to a distributed VCS (Git), the development team requires a structured workflow that supports collaboration, feature isolation, code review, and stable releases. This Git workflow guide defines how developers in different geographic locations can work simultaneously while maintaining a clean and reliable main branch.
+
+
+---
+
+2. Workflow Overview
+
+The recommended workflow for this distributed team is a Feature Branch + Pull Request (PR) workflow, supported by integration testing before merging changes into the main branch.
+
+This workflow includes:
+
+A stable main branch
+
+Feature branches for all new development
+
+Pull requests (PRs) for code reviews
+
+CI/CD integration tests triggered automatically
+
+Protected main branch to prevent direct commits
+
+Merge or rebase rules to keep history clean
+
+
+
+---
+
+3. Branching Strategy
+
+3.1 Main Branch (main)
+
+Always stable and deployable.
+
+Protected against direct commits.
+
+Only updated through approved pull requests.
+
+
+3.2 Feature Branches (feature/<name>)
+
+Created for new features, tasks, or bug fixes.
+
+Always branched off from main.
+
+
+Steps to create a feature branch:
+
+git checkout main
+git pull
+git checkout -b feature/login-page
+
+3.3 Optional Branches
+
+These can be used depending on the team’s maturity:
+
+develop — for Git Flow-style projects
+
+release/x.x — for preparing releases
+
+hotfix/x.x — for urgent production fixes
+
+
+For this project, the team will mainly use:
+
+✔ main
+✔ feature/*
+
+
+---
+
+4. Pull Request (PR) Workflow
+
+Pull requests are essential for collaboration, code review, and quality enforcement.
+
+4.1 Steps in the PR Process
+
+1. Developer finishes work on feature branch
+
+git add .
+git commit -m "Implemented login page UI"
+
+
+2. Push branch to remote
+
+git push -u origin feature/login-page
+
+
+3. Open a Pull Request on GitHub/GitLab Include:
+
+Description of the feature
+
+Screenshots/logs if needed
+
+List of changes and testing notes
+
+
+
+4. Code Review
+
+At least one other developer must approve
+
+Comments must be resolved before merging
+
+
+
+5. Automated Integration Testing
+
+PR triggers CI pipeline
+
+Tests must pass (unit tests, linting, build checks)
+
+
+
+6. Merge the PR
+
+Once approved and tests pass
+
+Merging must be performed through a PR, not manually
+
+
+
+7. Delete the feature branch
+After merging, cleanup unused branches.
+
+
+
+
+---
+
+5. Integration Testing Before Merging
+
+Integration testing ensures new features do not break the existing system.
+
+Tests triggered by PR:
+
+Unit tests
+
+Build checks
+
+Linting/style checks
+
+API integration tests
+
+UI tests (optional)
+
+
+Why this helps a distributed team:
+
+Ensures stable main branch
+
+Detects issues early
+
+Provides consistent quality across developers in different locations
+
+Reduces merge conflicts and production bugs
+
+
+
+---
+
+6. Merging and Rebasing Best Practices
+
+6.1 When to Merge
+
+Use merge commits for large features with multiple collaborators.
+
+Keeps a clear history of when features were completed.
+
+
+git merge feature/login-page
+
+6.2 When to Rebase
+
+Use rebase for small branches before creating a PR.
+
+Keeps commit history clean and linear.
+
+
+Example:
+
+git checkout feature/login-page
+git pull --rebase origin main
+
+6.3 Rules
+
+Never rebase after your branch has been pushed and used by others.
+
+Never rebase the main branch.
+
+
+
+---
+
+7. How This Workflow Supports a Distributed Team
+
+Challenge	How the Workflow Solves It
+
+Developers working in different time zones	Feature branching allows independent work without blocking others
+Code quality must remain high	PRs ensure code review and testing before merge
+Need for stable main branch	Protected branch rules prevent accidental changes
+Risk of merge conflicts	Frequent rebasing and automated tests reduce conflicts
+Collaboration across locations	PR comments and discussions centralize communication
+
+
+This workflow creates a structured, scalable method for collaboration that fits a geographically distributed development environment.
+
+
+---
+
+8. Summary
+
+This Git workflow provides:
+
+A stable main branch
+
+Isolated feature development
+
+Mandatory pull requests for code review
+
+Automated testing for continuous integration
+
+Safe merging practices with optional rebasing
+
+
+By following these practices, the team can confidently transition from SVN to Git and improve collaboration, code quality, and delivery speed across distributed teams.
+

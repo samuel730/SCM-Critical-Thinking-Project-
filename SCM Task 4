@@ -1,0 +1,284 @@
+
+Task 4: Enforcing Security Best Practices in a Distributed Git Repository
+
+Critical Thinking Project – Source Code Management for a Distributed Development Team
+
+
+---
+
+1. Introduction
+
+As the organization transitions from a centralized version control system (SVN) to a distributed model using Git, securing the source code becomes an essential requirement. Distributed teams introduce increased exposure to security risks, including unauthorized code changes, leaked credentials, and compromised developer accounts.
+
+This task implements security best practices in Git—including user access controls, SSH key management, branch protection rules, commit signing, and auditing mechanisms—to ensure that the codebase remains secure, tamper-proof, and compliant with organizational standards.
+
+
+---
+
+2. Security Objectives
+
+The security configuration aims to achieve the following:
+
+Prevent unauthorized access to the code repository
+
+Control who can write, review, and merge code
+
+Ensure identity verification through signed commits
+
+Protect main and critical branches from direct edits
+
+Provide full visibility and traceability for every code change
+
+Reduce the risk of leaked credentials or malicious commits
+
+
+
+---
+
+3. User Access Controls
+
+3.1 Role-Based Access
+
+Access is granted based on predefined GitHub roles:
+
+Role	Permissions	Purpose
+
+Owner/Admin	Full access	Repository configuration, security policies
+Maintainer	Merge PRs, manage branches	Senior developers, team leads
+Developer	Create branches, PRs	Daily coding tasks
+Read-only	View code only	Interns, auditors, QA observers
+
+
+3.2 How It Was Configured
+
+From GitHub:
+Settings → Collaborators & Teams → Add People / Assign Roles
+
+Teams were created for Engineering, QA, and DevOps.
+
+Least-privilege access was enforced: users only get access required for their job.
+
+
+3.3 Security Impact
+
+Reduces risk of accidental or malicious changes
+
+Ensures clearer separation of duties
+
+Helps maintain accountability over code contributions
+
+
+
+---
+
+4. Secure SSH Key Management
+
+4.1 Using SSH Keys Instead of Passwords
+
+Developers authenticate through SSH keys:
+
+1. Developer generates a secure SSH keypair:
+
+ssh-keygen -t ed25519 -C "username@example.com"
+
+
+2. Public key added to GitHub:
+Settings → SSH and GPG Keys → New SSH Key
+
+
+
+4.2 Requirements Enforced
+
+Only ED25519 or RSA 4096-bit keys allowed
+
+Keys must be rotated every 12 months
+
+Lost or compromised keys must be revoked immediately
+
+
+4.3 Security Impact
+
+Prevents password-based attacks
+
+Protects repository even if a laptop is compromised
+
+Stronger encryption ensures tamper-proof authentication
+
+
+
+---
+
+5. Enforcing Branch Protection Rules
+
+Branch protection rules ensure that critical branches (such as main) cannot be changed without review, testing, and approval.
+
+5.1 Configuration
+
+GitHub → Settings → Branches → Add Rule
+
+The following rules were enabled for the main branch:
+
+✔ Require pull requests before merging
+✔ Require at least 1–2 code reviewers
+✔ Block force pushes
+✔ Prevent branch deletions
+✔ Require status checks (CI/CD tests) to pass
+✔ Require signed commits
+✔ Require up-to-date branch before merging
+✔ Limit who can push to the branch (only maintainers)
+
+5.2 Security Impact
+
+Prevents unauthorized direct changes
+
+Ensures code review and testing for every merge
+
+Protects branch integrity
+
+Helps maintain a stable production codebase
+
+
+
+---
+
+6. Enforcing Signed Commits
+
+6.1 Purpose of Commit Signing
+
+Commit signing ensures that:
+
+The identity of the author is verified
+
+Commits cannot be impersonated
+
+No untrusted code enters the repository
+
+
+6.2 How It Was Implemented
+
+1. A GPG key or SSH signing key was generated:
+
+gpg --full-generate-key
+
+
+2. Public key added to GitHub:
+Settings → SSH and GPG Keys → New GPG Key
+
+
+3. Git was configured to sign commits automatically:
+
+
+
+git config --global commit.gpgsign true
+git config --global user.signingkey <KEY_ID>
+
+6.3 GitHub Enforcement
+
+Branch protection rule: Require signed commits
+
+6.4 Security Impact
+
+Guarantees authenticity of code authors
+
+Prevents fake commits and impersonation attacks
+
+Adds cryptographic assurance of code integrity
+
+
+
+---
+
+7. Auditing and Change Tracking
+
+7.1 GitHub Audit Logs
+
+For teams on GitHub Team/Enterprise:
+
+Settings → Audit Log
+
+Tracks:
+✔ Permission changes
+✔ Branch protections updates
+✔ Failed login attempts
+✔ Commit and push activity
+✔ SSH key additions/removal
+
+
+7.2 Commit History & PR Logs
+
+Pull requests store:
+
+Code diffs
+
+Comments and reviews
+
+Test results
+
+Approval history
+
+
+7.3 Security Impact
+
+Full traceability of every action
+
+Clear accountability for each code change
+
+Helps detect malicious activities or policy violations
+
+
+
+---
+
+8. Additional Repository Hardening Measures
+
+8.1 Secret Scanning
+
+GitHub Advanced Security or free secret scanning notifies the team if:
+
+API keys
+
+Passwords
+
+Cloud credentials
+
+
+accidentally appear in the repo.
+
+8.2 Dependabot Alerts
+
+Automatically checks for vulnerabilities in dependencies.
+
+8.3 2FA Requirement
+
+Enabled to ensure all developers authenticate with two-factor authentication.
+
+8.4 Security Policy File
+
+Created a SECURITY.md file describing how to report vulnerabilities.
+
+
+---
+
+9. Summary
+
+By implementing these Git security best practices, the development team benefits from:
+
+✔ Improved Code Security
+
+Only authorized users can access, push, or merge changes.
+
+✔ Integrity and Authenticity of Code
+
+Commit signing and branch protections prevent tampering.
+
+✔ Secure Developer Authentication
+
+SSH key authentication eliminates password risk.
+
+✔ Controlled and Audited Development
+
+All actions are logged and traceable, supporting compliance and accountability.
+
+✔ Aligned with Modern DevOps Standards
+
+Ensures a scalable and secure SDLC for distributed development teams.

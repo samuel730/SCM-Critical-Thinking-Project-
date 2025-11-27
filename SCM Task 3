@@ -1,0 +1,272 @@
+
+# Task 3: Automating Code Quality and Deployment Using GitHub Actions
+
+Critical Thinking Project – Source Code Management for a Distributed Development Team
+
+
+---
+
+1. Introduction
+
+As the development team transitions from a centralized VCS (SVN) to a distributed model using Git, automation becomes essential for maintaining code quality, minimizing integration errors, and ensuring faster deployments. GitHub Actions provides a native CI/CD solution that integrates seamlessly with Git-based workflows, enabling the team to automate testing, code quality checks, and deployments for every pushed branch.
+
+This document describes the CI/CD pipeline implemented using GitHub Actions, outlines how tests are triggered, and explains how staging deployments are executed.
+
+
+---
+
+2. Pipeline Objectives
+
+The CI/CD workflow is designed to accomplish the following:
+
+2.1 Automated Testing
+
+Automatically run unit tests every time a developer pushes a feature branch.
+
+Prevent broken code from being merged into the main branch.
+
+
+2.2 Code Quality Checks
+
+Use linters, style checkers, or static analysis tools.
+
+Ensure consistent coding standards across the distributed team.
+
+
+2.3 Automated Deployment to a Staging Environment
+
+Deploy code to a staging server or cloud environment (e.g., GitHub Pages, AWS, Firebase, or a container environment) once tests pass.
+
+Provide an environment for QA engineers and distributed team members to validate features before production.
+
+
+
+---
+
+3. GitHub Actions CI/CD Pipeline Design
+
+The GitHub Actions workflow file is stored in:
+
+.github/workflows/ci.yml
+
+Below is an example pipeline that performs testing, linting, and deployment.
+
+
+---
+
+4. CI/CD Pipeline Workflow (YAML File)
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/*'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Unit Tests
+        run: npm test
+
+      - name: Run Linter / Code Quality Checks
+        run: npm run lint
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Add deployment commands here (SSH, rsync, Docker, etc.)
+
+
+---
+
+5. How the Pipeline Works
+
+5.1 Trigger Conditions
+
+The workflow triggers automatically:
+
+When code is pushed to the main branch
+
+When code is pushed to any feature branch (feature/*)
+
+When a pull request is created or updated (optional to add)
+
+
+This ensures that every contribution is tested before merging.
+
+
+---
+
+6. Pipeline Stages Explained
+
+6.1 Stage 1: Checkout Code
+
+GitHub Actions pulls the repository into the runner:
+
+uses: actions/checkout@v3
+
+This ensures tests run on the exact code pushed by the developer.
+
+
+---
+
+6.2 Stage 2: Install Dependencies
+
+All required libraries and packages are installed:
+
+npm install
+
+This is necessary for projects using JavaScript/Node.js (or pip install for Python, etc.).
+
+
+---
+
+6.3 Stage 3: Automated Unit Tests
+
+npm test
+
+Executes unit tests
+
+Fails the pipeline if any test does not pass
+
+Prevents poor-quality code from entering the main branch
+
+
+
+---
+
+6.4 Stage 4: Code Quality & Linting
+
+npm run lint
+
+Static analysis ensures:
+
+Consistent formatting
+
+No syntax errors
+
+Reduced technical debt
+
+
+This is critical for distributed teams with different working styles.
+
+
+---
+
+6.5 Stage 5: Deploy to Staging (Only on Main)
+
+The deployment job runs only if:
+
+if: github.ref == 'refs/heads/main'
+
+Meaning:
+
+Feature branches do not deploy
+
+Only approved, merged code is pushed to staging
+
+
+Deployment methods could include:
+
+Uploading files to a server using SSH
+
+Deploying a Docker image to a test cluster
+
+Deploying to GitHub Pages
+
+Uploading to Firebase hosting
+
+Triggering a cloud deployment via API
+
+
+This automated deployment ensures that QA and remote teams immediately see the latest version in the staging environment.
+
+
+---
+
+7. How Developers Trigger Tests
+
+Tests are triggered automatically when a developer:
+
+Pushes a branch:
+
+git push origin feature/login
+
+Creates a pull request:
+
+GitHub → New Pull Request
+
+
+No manual steps are required.
+
+
+---
+
+8. Benefits of This CI/CD Pipeline for Distributed Teams
+
+✔ Consistency
+
+Everyone, regardless of timezone or location, works with the same automated checks.
+
+✔ Faster Feedback
+
+Developers get immediate test results after pushing code.
+
+✔ Improved Code Quality
+
+Automated linting and testing enforce clean, stable contributions.
+
+✔ Safe Deployments
+
+Code deployed to staging has already passed all checks.
+
+✔ Reduced Merge Conflicts
+
+Feature branches ensure isolated development.
+
+✔ Smooth Collaboration
+
+PRs, checks, and comments become a central place for team interactions.
+
+
+---
+
+9. Summary
+
+This CI/CD integration automates the essential components of modern software development:
+
+Unit testing
+
+Code quality verification
+
+Deployment to staging
+
+Integration with Git workflows
+
+
+By using GitHub Actions, the team benefits from a scalable, cloud-based automation solution that supports distributed development and ensures a frictionless transition from SVN to Git.
+
